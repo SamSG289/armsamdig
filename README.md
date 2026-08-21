@@ -4,9 +4,9 @@ Una app web para armar tu placard digital: subís una foto de cada prenda
 (pantalón, zapatillas, collar, gafas, buzo, campera, remera, etc.), la app
 la identifica automáticamente (estilo Google Lens), le recorta el fondo
 para guardarla como un "modelo" en PNG, y le asignás la talla. Después
-podés armar outfits combinando tus prendas: el tamaño de cada una en el
-armador se ajusta solo según su talla, y te avisa si combina bien con tu
-talla de referencia.
+podés armar outfits sobre un **maniquí 2D**, combinando tus prendas: el
+tamaño de cada una en el armador se ajusta solo según su talla, y te avisa
+si combina bien con tu talla de referencia.
 
 Todo corre **en tu navegador**: las fotos, el reconocimiento y el armario
 se guardan localmente en tu dispositivo (IndexedDB). No hay backend ni se
@@ -22,10 +22,22 @@ sube ninguna imagen a un servidor.
   bolso) a categorías del armario. Es un reconocimiento "best effort": si
   no identifica bien la prenda (o si no hay conexión a internet para bajar
   el modelo la primera vez), siempre podés elegir la categoría a mano.
-- **Modelo en PNG**: al guardar la prenda, la app recorta el fondo de la
-  foto (asumiendo un fondo relativamente parejo, como una mesa, percha o
-  pared lisa) y exporta un PNG con transparencia, listo para combinarse
-  con otras prendas en el armador de outfits.
+- **Modelo en PNG (recorte con IA)**: al guardar la prenda, la app le
+  recorta el fondo con un modelo de segmentación de imágenes (isnet) que
+  también corre 100% en el navegador vía
+  [`@imgly/background-removal`](https://github.com/imgly/background-removal-js)
+  (WASM/ONNX, sin servidor propio, sin costo, sin API key). Da un recorte
+  mucho más prolijo que separar por color de fondo, incluso con fondos
+  poco uniformes. Si por algún motivo no se puede usar (sin conexión para
+  bajar el modelo la primera vez, navegador no compatible), la app cae
+  automáticamente a un recorte más simple por color de borde, para que
+  nunca se rompa el flujo de guardado. El resultado siempre es un PNG con
+  transparencia.
+- **Maniquí 2D**: el armador de outfits dibuja un maniquí (silueta humana
+  de frente, en SVG) y cada prenda se ubica sobre la zona del cuerpo que
+  le corresponde (cabeza, ojos, cuello, torso, piernas, pies), en vez de
+  quedar suelta en el aire. Así podés ver de un vistazo cómo queda
+  compuesto el outfit completo.
 - **Tallas y outfits**: cada categoría usa un sistema de tallas (ropa:
   XS–XXXL, calzado: numeración EU, o "medida"/libre para accesorios). En
   "Mi perfil" definís tu talla de referencia (parte superior, parte
@@ -55,9 +67,12 @@ npm run preview
 
 ## Limitaciones conocidas
 
-- El recorte de fondo funciona mejor con fotos de fondo uniforme (mesa,
-  percha, pared lisa). Con fondos muy texturados el recorte puede ser
-  imperfecto; siempre podés volver a sacar la foto con mejor fondo.
+- El recorte con IA descarga su modelo (unos MB) la primera vez que se
+  usa, así que esa primera prenda puede tardar un poco más en guardarse;
+  las siguientes son más rápidas porque queda cacheado en el navegador. Si
+  no hay red disponible para esa descarga, se usa el recorte de respaldo
+  por color, que funciona mejor con fotos de fondo uniforme (mesa, percha,
+  pared lisa).
 - El reconocimiento automático usa un modelo genérico (no entrenado
   específicamente para moda), así que puede confundir categorías
   parecidas (ej. buzo vs. campera). Se puede corregir a mano antes de
@@ -65,3 +80,11 @@ npm run preview
 - Los datos se guardan solo en el navegador/dispositivo donde los cargás
   (IndexedDB + localStorage). Si limpiás los datos del sitio o cambiás de
   navegador, no vas a ver tu armario anterior.
+- El recorte con IA usa un modelo de segmentación (isnet) especializado en
+  separar objeto/fondo, no un modelo generativo tipo Gemini "nano banana".
+  Es gratis y no necesita backend ni API key, pero no "genera" ni retoca
+  la foto de catálogo, solo la recorta bien. Si en algún momento se quiere
+  ese nivel de calidad (foto de catálogo prolija, con sombra e
+  iluminación parejas), se puede sumar como paso opcional, pero requiere
+  un backend chico (para no exponer la API key en el navegador) y tiene
+  costo por imagen procesada.

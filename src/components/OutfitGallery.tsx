@@ -1,5 +1,6 @@
 import type { Outfit, WardrobeItem } from '../types/wardrobe'
 import ItemThumb from './ItemThumb'
+import Mannequin from './Mannequin'
 
 interface Props {
   outfits: Outfit[]
@@ -26,6 +27,7 @@ export default function OutfitGallery({ outfits, items, onDelete }: Props) {
             ×
           </button>
           <div className="relative aspect-[3/4] rounded-lg bg-neutral-950 overflow-hidden">
+            <Mannequin className="absolute inset-0 w-full h-full text-neutral-800" />
             {outfit.placements.map((p) => {
               const item = itemById.get(p.itemId)
               if (!item) return null
@@ -33,7 +35,7 @@ export default function OutfitGallery({ outfits, items, onDelete }: Props) {
                 <div
                   key={p.itemId}
                   className="absolute -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${28 * p.scale}%` }}
+                  style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.width}%` }}
                 >
                   <ItemThumb blob={item.thumbBlob} alt={item.name} className="w-full h-auto object-contain" />
                 </div>

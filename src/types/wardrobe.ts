@@ -55,7 +55,10 @@ export interface OutfitItemPlacement {
   itemId: string
   x: number
   y: number
-  scale: number
+  // Ancho de renderizado en % del ancho del contenedor (ya incluye el
+  // factor de escala por talla), para que se vea igual en el armador y en
+  // la galería de outfits guardados.
+  width: number
 }
 
 export interface Outfit {

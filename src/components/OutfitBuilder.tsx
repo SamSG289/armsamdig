@@ -4,6 +4,7 @@ import { compareSizes, getGarmentInfo, referenceTallaFor, visualScaleFor } from 
 import { garmentSlotToUiSlot, SLOT_LAYOUT, UI_SLOT_LABEL, UI_SLOTS, type UiSlot } from '../lib/outfitLayout'
 import { saveOutfit } from '../lib/db'
 import ItemThumb from './ItemThumb'
+import Mannequin from './Mannequin'
 
 interface Props {
   items: WardrobeItem[]
@@ -62,7 +63,7 @@ export default function OutfitBuilder({ items, sizeProfile, onSaved }: Props) {
           const info = getGarmentInfo(item.category)
           const scale = visualScaleFor(item.talla, info.sizeSystem)
           const offset = slot === 'accesorio' ? idx * 16 : 0
-          placements.push({ itemId, x: layout.left, y: layout.top + offset, scale })
+          placements.push({ itemId, x: layout.left, y: layout.top + offset, width: layout.baseWidth * scale })
         })
       }
       const outfit: Outfit = {
@@ -85,9 +86,7 @@ export default function OutfitBuilder({ items, sizeProfile, onSaved }: Props) {
   return (
     <div className="grid md:grid-cols-[1fr_320px] gap-6">
       <div className="relative aspect-[3/4] max-w-md mx-auto w-full rounded-2xl bg-neutral-900 border border-neutral-800 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center text-neutral-700 text-sm select-none">
-          Maniquí
-        </div>
+        <Mannequin className="absolute inset-0 w-full h-full text-neutral-800" />
         {UI_SLOTS.map((slot) => {
           if (slot === 'torsoInferior' && isDress) return null
           const ids = selection[slot] ?? []

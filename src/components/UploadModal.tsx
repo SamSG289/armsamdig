@@ -14,6 +14,7 @@ type Stage = 'elegir' | 'identificando' | 'revisar' | 'guardando'
 
 export default function UploadModal({ onClose, onSaved }: Props) {
   const [stage, setStage] = useState<Stage>('elegir')
+  const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [classification, setClassification] = useState<ClassificationResult | null>(null)
   const [category, setCategory] = useState<GarmentCategory>('otro')
@@ -21,6 +22,7 @@ export default function UploadModal({ onClose, onSaved }: Props) {
   const [name, setName] = useState('')
   const [colorHex, setColorHex] = useState('#888888')
   const [error, setError] = useState<string | null>(null)
+  const [cutoutProgress, setCutoutProgress] = useState(0)
   const imgRef = useRef<HTMLImageElement | null>(null)
 
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function UploadModal({ onClose, onSaved }: Props) {
 
   async function handleFile(f: File) {
     setError(null)
+    setFile(f)
     const url = URL.createObjectURL(f)
     setPreviewUrl(url)
     setStage('identificando')
@@ -69,11 +72,12 @@ export default function UploadModal({ onClose, onSaved }: Props) {
   }
 
   async function handleSave() {
-    if (!imgRef.current) return
+    if (!file) return
     setStage('guardando')
     setError(null)
+    setCutoutProgress(0)
     try {
-      const cutout = await cutoutToPng(imgRef.current)
+      const cutout = await cutoutToPng(file, setCutoutProgress)
       const item: WardrobeItem = {
         id: crypto.randomUUID(),
         name: name.trim() || getGarmentInfo(category).label,
@@ -221,6 +225,12 @@ export default function UploadModal({ onClose, onSaved }: Props) {
               </div>
             )}
 
+            {stage === 'guardando' && (
+              <p className="text-xs text-neutral-500">
+                La primera vez puede tardar un poco (descarga el modelo de IA de recorte).
+              </p>
+            )}
+
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={onClose} className="px-4 py-2 rounded-md text-neutral-300 hover:text-white">Cancelar</button>
               <button
@@ -228,7 +238,9 @@ export default function UploadModal({ onClose, onSaved }: Props) {
                 disabled={stage === 'identificando' || stage === 'guardando'}
                 className="px-4 py-2 rounded-md bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium"
               >
-                {stage === 'guardando' ? 'Guardando...' : 'Guardar en el armario'}
+                {stage === 'guardando'
+                  ? `Recortando con IA... ${Math.round(cutoutProgress * 100)}%`
+                  : 'Guardar en el armario'}
               </button>
             </div>
           </div>
