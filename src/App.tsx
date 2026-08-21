@@ -86,7 +86,9 @@ function App() {
       <main className="max-w-5xl mx-auto px-4 py-6">
         {tab === 'armario' && <WardrobeGrid items={items} sizeProfile={sizeProfile} onDelete={handleDeleteItem} />}
         {tab === 'crear' && <OutfitBuilder items={items} sizeProfile={sizeProfile} onSaved={refreshOutfits} />}
-        {tab === 'outfits' && <OutfitGallery outfits={outfits} items={items} onDelete={handleDeleteOutfit} />}
+        {tab === 'outfits' && (
+          <OutfitGallery outfits={outfits} items={items} sizeProfile={sizeProfile} onDelete={handleDeleteOutfit} />
+        )}
         {tab === 'perfil' && <SizeProfileForm profile={sizeProfile} onChange={updateSizeProfile} />}
       </main>
 

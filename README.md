@@ -33,11 +33,15 @@ sube ninguna imagen a un servidor.
   automáticamente a un recorte más simple por color de borde, para que
   nunca se rompa el flujo de guardado. El resultado siempre es un PNG con
   transparencia.
-- **Maniquí 2D**: el armador de outfits dibuja un maniquí (silueta humana
-  de frente, en SVG) y cada prenda se ubica sobre la zona del cuerpo que
-  le corresponde (cabeza, ojos, cuello, torso, piernas, pies), en vez de
-  quedar suelta en el aire. Así podés ver de un vistazo cómo queda
-  compuesto el outfit completo.
+- **Maniquí 2D a tu medida**: el armador de outfits dibuja un maniquí
+  (silueta humana de frente, en SVG) y cada prenda se ubica sobre la zona
+  del cuerpo que le corresponde (cabeza, ojos, cuello, torso, piernas,
+  pies), en vez de quedar suelta en el aire. En "Mi perfil" configurás
+  género (masculino/femenino/neutro), altura y peso: el maniquí cambia de
+  forma (contextura, hombros/cintura/cadera) y las prendas se estiran o
+  angostan junto con él, para que el outfit se vea parecido a como te
+  queda a vos. Esto se combina con el ajuste por talla de cada prenda
+  (una L se ve más grande que una S dentro del mismo cuerpo).
 - **Tallas y outfits**: cada categoría usa un sistema de tallas (ropa:
   XS–XXXL, calzado: numeración EU, o "medida"/libre para accesorios). En
   "Mi perfil" definís tu talla de referencia (parte superior, parte
@@ -77,6 +81,10 @@ npm run preview
   específicamente para moda), así que puede confundir categorías
   parecidas (ej. buzo vs. campera). Se puede corregir a mano antes de
   guardar.
+- El maniquí es una silueta 2D estilizada, no un modelo 3D ni una
+  reconstrucción real de tu cuerpo: la altura/peso solo se usan para
+  calcular un factor de escala aproximado (proporción y contextura), no
+  para simular medidas anatómicas exactas.
 - Los datos se guardan solo en el navegador/dispositivo donde los cargás
   (IndexedDB + localStorage). Si limpiás los datos del sitio o cambiás de
   navegador, no vas a ver tu armario anterior.

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Outfit, OutfitItemPlacement, SizeProfile, WardrobeItem } from '../types/wardrobe'
-import { compareSizes, getGarmentInfo, referenceTallaFor, visualScaleFor } from '../lib/sizing'
-import { garmentSlotToUiSlot, SLOT_LAYOUT, UI_SLOT_LABEL, UI_SLOTS, type UiSlot } from '../lib/outfitLayout'
+import { compareSizes, computeBodyScale, getGarmentInfo, referenceTallaFor, visualScaleFor } from '../lib/sizing'
+import { applyBodyScale, garmentSlotToUiSlot, SLOT_LAYOUT, UI_SLOT_LABEL, UI_SLOTS, type UiSlot } from '../lib/outfitLayout'
 import { saveOutfit } from '../lib/db'
 import ItemThumb from './ItemThumb'
 import Mannequin from './Mannequin'
@@ -35,6 +35,7 @@ export default function OutfitBuilder({ items, sizeProfile, onSaved }: Props) {
   }, [items])
 
   const itemById = useMemo(() => new Map(items.map((i) => [i.id, i])), [items])
+  const bodyScale = useMemo(() => computeBodyScale(sizeProfile), [sizeProfile])
 
   function toggleItem(slot: UiSlot, itemId: string, multi: boolean) {
     setSelection((prev) => {
@@ -86,7 +87,12 @@ export default function OutfitBuilder({ items, sizeProfile, onSaved }: Props) {
   return (
     <div className="grid md:grid-cols-[1fr_320px] gap-6">
       <div className="relative aspect-[3/4] max-w-md mx-auto w-full rounded-2xl bg-neutral-900 border border-neutral-800 overflow-hidden">
-        <Mannequin className="absolute inset-0 w-full h-full text-neutral-800" />
+        <Mannequin
+          genero={sizeProfile.genero}
+          heightScale={bodyScale.heightScale}
+          widthScale={bodyScale.widthScale}
+          className="absolute inset-0 w-full h-full text-neutral-800"
+        />
         {UI_SLOTS.map((slot) => {
           if (slot === 'torsoInferior' && isDress) return null
           const ids = selection[slot] ?? []
@@ -96,13 +102,13 @@ export default function OutfitBuilder({ items, sizeProfile, onSaved }: Props) {
             if (!item) return null
             const info = getGarmentInfo(item.category)
             const scale = visualScaleFor(item.talla, info.sizeSystem)
-            const width = layout.baseWidth * scale
             const topOffset = slot === 'accesorio' ? idx * 18 : 0
+            const adjusted = applyBodyScale(layout.top + topOffset, layout.baseWidth * scale, slot, bodyScale)
             return (
               <div
                 key={itemId}
                 className="absolute -translate-x-1/2 -translate-y-1/2 transition-all"
-                style={{ left: `${layout.left}%`, top: `${layout.top + topOffset}%`, width: `${width}%`, zIndex: layout.z }}
+                style={{ left: `${layout.left}%`, top: `${adjusted.top}%`, width: `${adjusted.width}%`, zIndex: layout.z }}
               >
                 <ItemThumb blob={item.thumbBlob} alt={item.name} className="w-full h-auto object-contain drop-shadow-lg" />
               </div>

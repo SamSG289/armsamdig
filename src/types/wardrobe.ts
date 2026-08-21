@@ -68,8 +68,15 @@ export interface Outfit {
   placements: OutfitItemPlacement[]
 }
 
+export type BodyGender = 'masculino' | 'femenino' | 'neutro'
+
 export interface SizeProfile {
   tallaSuperior: string
   tallaInferior: string
   tallaCalzado: string
+  // Datos corporales usados para ajustar la forma y el tamaño del maniquí
+  // y de las prendas al armar el outfit.
+  altura: number // cm
+  peso: number // kg
+  genero: BodyGender
 }

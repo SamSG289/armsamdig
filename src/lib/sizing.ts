@@ -116,4 +116,30 @@ export const DEFAULT_SIZE_PROFILE: SizeProfile = {
   tallaSuperior: 'M',
   tallaInferior: 'M',
   tallaCalzado: '40',
+  altura: 170,
+  peso: 65,
+  genero: 'neutro',
+}
+
+const REFERENCE_HEIGHT_CM = 170
+const REFERENCE_BMI = 21
+
+export interface BodyScale {
+  heightScale: number
+  widthScale: number
+}
+
+// Deriva del perfil corporal (altura/peso) un factor de escala vertical
+// (altura) y uno horizontal (contextura, a partir del IMC respecto a un
+// valor de referencia) para estirar/angostar el maniquí y las prendas.
+export function computeBodyScale(profile: SizeProfile): BodyScale {
+  const altura = profile.altura > 0 ? profile.altura : REFERENCE_HEIGHT_CM
+  const peso = profile.peso > 0 ? profile.peso : 65
+
+  const heightScale = clamp(altura / REFERENCE_HEIGHT_CM, 0.82, 1.2)
+
+  const bmi = peso / (altura / 100) ** 2
+  const widthScale = clamp(1 + (bmi - REFERENCE_BMI) * 0.025, 0.8, 1.35)
+
+  return { heightScale, widthScale }
 }
